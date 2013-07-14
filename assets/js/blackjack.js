@@ -6,6 +6,7 @@ var Card = function(value, suit) {
 
 var Player = function(name) {
     this.name = name;
+    this.hand = [];
 }
 
 var deck = [];
@@ -22,10 +23,27 @@ for (var i = 1; i < 14; i++) {
  */
 deck.sort(function() { return (0.5 - Math.random()); });
 
-console.log(deck);
+// create dealer and assign them their first card
+var dealer = new Player('Dealer');
+dealer.hand.push(deck.pop());
 
-// assign dealer their first card
-// assign players their first cards
+// assign players their first card
+var players = [
+    new Player('Martin')
+];
+for (var i = 0; i < players.length; i++) {
+    players[i].hand.push(deck.pop());
+}
+
+// assign dealer and players their seconds cards
+dealer.hand.push(deck.pop());
+
+for (var i = 0; i < players.length; i++) {
+    players[i].hand.push(deck.pop());
+}
+
+console.log(deck, dealer, players);
+
 // each player gets turn (hit, stick)
 // when end player reached, dealer gets turn
 // after dealer’s turn, calculate results
