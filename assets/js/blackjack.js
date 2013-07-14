@@ -49,7 +49,7 @@ for (var i = 0; i < players.length; i++) {
     players[i].hand.push(deck.pop());
 }
 
-// assign dealer and players their seconds cards
+// assign dealer and players their second cards
 dealer.hand.push(deck.pop());
 dealer.calculateHandTotal();
 
