@@ -1,28 +1,32 @@
-// create deck
+// create Card object
 var Card = function(value, suit) {
     this.value = value;
     this.suit = suit;
-    this.getValue = function() {
-        return (this.value > 10) ? 10 : this.value;
-    };
 }
 
+Card.prototype.getValue = function() {
+    return (this.value > 10) ? 10 : this.value;
+};
+
+// create Player object
 var Player = function(name) {
     this.name = name;
     this.hand = [];
-    this.handTotal = 0;
-    this.calculateHandTotal = function() {
-        this.handTotal = 0;
-        for (var i = 0; i < this.hand.length; i++) {
-            this.handTotal += (this.hand[i].value > 10) ? 10 : this.hand[i].value;
-        }
-    };
-    this.isBust = function() {
-        this.calculateHandTotal();
-        return (this.handTotal > 21);
-    };
 }
 
+Player.prototype.getHandTotal = function() {
+    var handTotal = 0;
+    for (var i = 0; i < this.hand.length; i++) {
+        handTotal += (this.hand[i].value > 10) ? 10 : this.hand[i].value;
+    }
+    return handTotal;
+};
+
+Player.prototype.isBust = function() {
+    return (this.getHandTotal() > 21);
+};
+
+// create deck
 var deck = [];
 
 for (var i = 1; i < 14; i++) {
@@ -51,24 +55,21 @@ for (var i = 0; i < players.length; i++) {
 
 // assign dealer and players their second cards
 dealer.hand.push(deck.pop());
-dealer.calculateHandTotal();
 
 for (var i = 0; i < players.length; i++) {
     players[i].hand.push(deck.pop());
-    players[i].calculateHandTotal();
 }
 
-console.log('Player’s hand total: ' + players[0].handTotal);
+console.log('Player’s hand total: ' + players[0].getHandTotal());
 
 // each player gets turn (hit, stick)
 $('.hit').on('click', function(e) {
     e.preventDefault();
     players[0].hand.push(deck.pop());
-    players[0].calculateHandTotal();
     console.log('Player hit');
-    console.log('Player’s new hand total: ' + players[0].handTotal);
-    if (players[0].handTotal > 20) {
-        if (players[0].handTotal > 21) {
+    console.log('Player’s new hand total: ' + players[0].getHandTotal());
+    if (players[0].getHandTotal() > 20) {
+        if (players[0].getHandTotal() > 21) {
             console.log('Player bust');
         }
         else {
@@ -87,23 +88,22 @@ $('.stick').on('click', function(e) {
 // when end player reached, dealer gets turn
 function dealersTurn() {
     console.log('Dealer’s turn');
-    console.log('Dealer’s hand total: ' + dealer.handTotal);
-    while (dealer.handTotal < 18) {
+    console.log('Dealer’s hand total: ' + dealer.getHandTotal());
+    while (dealer.getHandTotal() < 18) {
         dealer.hand.push(deck.pop());
-        dealer.calculateHandTotal();
-        console.log('Dealer’s new hand total: ' + dealer.handTotal);
+        console.log('Dealer’s new hand total: ' + dealer.getHandTotal());
     }
     
     // calculate results
-    console.log('Dealer’s hand total at end of game: ' + dealer.handTotal);
+    console.log('Dealer’s hand total at end of game: ' + dealer.getHandTotal());
     console.log('Dealer bust: ' + dealer.isBust());
     
     for (var i = 0; i < players.length; i++) {
-        console.log('Player ' + i + '’s hand total at end of game: ' + players[i].handTotal);
+        console.log('Player ' + i + '’s hand total at end of game: ' + players[i].getHandTotal());
         console.log('Player ' + i + ' bust: ' + players[i].isBust());
         
         // if player is not bust and player’s hand is greater than dealer’s, player wins
-        if (!players[i].isBust() && players[i].handTotal > dealer.handTotal) {
+        if (!players[i].isBust() && players[i].getHandTotal() > dealer.getHandTotal()) {
             console.log('Player ' + i + ' wins');
             // here we would pay out to player
         }
