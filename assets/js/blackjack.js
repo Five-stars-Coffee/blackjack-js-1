@@ -12,6 +12,8 @@ Card.prototype.getValue = function() {
 var Player = function(name) {
     this.name = name;
     this.hand = [];
+    this.purse = 100;
+    this.stake = 0;
 }
 
 Player.prototype.getHandTotal = function() {
@@ -25,6 +27,34 @@ Player.prototype.getHandTotal = function() {
 Player.prototype.isBust = function() {
     return (this.getHandTotal() > 21);
 };
+
+Player.prototype.setStake = function(stake) {
+    stake = parseInt(stake);
+    if (isNaN(stake)) {
+        throw new Error('Bad amount');
+    }
+    if (stake > this.purse) {
+        throw new Error('Can’t stake more than purse');
+    }
+    this.stake = stake;
+    this.decrementPurse(stake);
+};
+
+Player.prototype.decrementPurse = function(amount) {
+    amount = parseInt(amount);
+    if (isNaN(amount)) {
+        throw new Error('Bad amount');
+    }
+    this.purse -= amount;
+}
+
+Player.prototype.incrementPurse = function(amount) {
+    amount = parseInt(amount);
+    if (isNaN(amount)) {
+        throw new Error('Bad amount');
+    }
+    this.purse += amount;
+}
 
 // create deck
 var deck = [];
@@ -43,12 +73,28 @@ deck.sort(function() { return (0.5 - Math.random()); });
 
 // create dealer and assign them their first card
 var dealer = new Player('Dealer');
-dealer.hand.push(deck.pop());
 
 // assign players their first card
 var players = [
     new Player('Martin')
 ];
+
+// prompt player for stake
+var stake = prompt('Enter stake amount (numbers only)');
+
+try {
+    players[0].setStake(stake);
+    
+    console.log('Player has staked ' + stake);
+    console.log('Player’s purse is now ' + players[0].purse);
+}
+catch (e) {
+    console.error(e.message);
+}
+
+// assign dealer and players their first card
+dealer.hand.push(deck.pop());
+
 for (var i = 0; i < players.length; i++) {
     players[i].hand.push(deck.pop());
 }
@@ -99,23 +145,25 @@ function dealersTurn() {
     console.log('Dealer bust: ' + dealer.isBust());
     
     for (var i = 0; i < players.length; i++) {
-        console.log('Player ' + i + '’s hand total at end of game: ' + players[i].getHandTotal());
-        console.log('Player ' + i + ' bust: ' + players[i].isBust());
-        
-        // if player is not bust and player’s hand is greater than dealer’s, player wins
-        if (!players[i].isBust() && players[i].getHandTotal() > dealer.getHandTotal()) {
-            console.log('Player ' + i + ' wins');
-            // here we would pay out to player
+        // check if player is bust
+        if (players[i].isBust()) {
+            console.log('Player ' + i + ' bust (' + players[i].getHandTotal() + ')');
         }
         else {
-            console.log('Player ' + i + ' loses');
-            if (dealer.isBust()) {
-                // dealer is bust, so return stakes to players
+            // check if dealer bust or if player’s hand is greater than dealer’s
+            if (dealer.isBust() || players[i].getHandTotal() > dealer.getHandTotal()) {
+                console.log('Player ' + i + ' wins');
+                players[i].incrementPurse(players[i].stake * 2);
             }
             else {
-                // dealer is still in the game so takes players’ stakes
+                console.log('Player ' + i + ' loses');
             }
         }
+        
+        // reset player’s stake to zero
+        players[i].setStake(0);
+        
+        console.log('Player’s new purse is ' + players[i].purse);
     }
     
     console.log('Game over');
